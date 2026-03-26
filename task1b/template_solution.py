@@ -3,10 +3,7 @@
 # First, we import necessary libraries:
 import numpy as np
 import pandas as pd
-
-# Add any additional imports here (however, the task is solvable without using 
-# any additional imports)
-# import ...
+from sklearn.linear_model import LogisticRegression
 
 def transform_features(X):
     """
@@ -26,8 +23,13 @@ def transform_features(X):
     ----------
     X_transformed: matrix of floats: dim = (700,21), transformed input with 21 features
     """
-    X_transformed = np.zeros((700, 21))
-    # TODO: Enter your code here
+    X_transformed = np.hstack([
+        X,                          # phi 1-5:  linear
+        X ** 2,                     # phi 6-10: quadratic
+        np.exp(X),                  # phi 11-15: exponential
+        np.cos(X),                  # phi 16-20: cosine
+        np.ones((X.shape[0], 1))    # phi 21:   constant
+    ])
     assert X_transformed.shape == (700, 21)
     return X_transformed
 
@@ -46,9 +48,21 @@ def fit_logistic_regression(X, y):
     ----------
     weights: array of floats: dim = (21,), optimal parameters of logistic regression
     """
-    weights = np.zeros((21,))
     X_transformed = transform_features(X)
-    # TODO: Enter your code here
+
+    # class_weight='balanced' adjusts for imbalanced classes → better F1
+    # C controls regularization (tune if needed: smaller C = stronger regularization)
+    # fit_intercept=False because phi_21=1 already acts as bias
+    model = LogisticRegression(
+        fit_intercept=False,
+        class_weight='balanced',
+        C=1.0,
+        max_iter=10000,
+        solver='lbfgs'
+    )
+    model.fit(X_transformed, y)
+    weights = model.coef_[0]
+
     assert weights.shape == (21,)
     return weights
 
@@ -66,4 +80,4 @@ if __name__ == "__main__":
     # The function retrieving optimal LR parameters
     w = fit_logistic_regression(X, y)
     # Save results in the required format
-    np.savetxt("./results.csv", w, fmt="%.12f")
+    np.savetxt("./results2.csv", w, fmt="%.12f")
