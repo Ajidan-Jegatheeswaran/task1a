@@ -50,9 +50,7 @@ def fit_logistic_regression(X, y):
     """
     X_transformed = transform_features(X)
 
-    # class_weight='balanced' adjusts for imbalanced classes → better F1
-    # C controls regularization (tune if needed: smaller C = stronger regularization)
-    # fit_intercept=False because phi_21=1 already acts as bias
+    
     model = LogisticRegression(
         fit_intercept=False,
         class_weight='balanced',
